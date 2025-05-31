@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">长者助手</string>
+    
+    <!-- Calibration Activity -->
+    <string name="calibration_title">Voice Calibration</string>
+    <string name="calibration_instruction_start">Please read the following sentences to help the app understand your voice better.</string>
+    <string name="calibration_complete">Calibration completed successfully!</string>
+    <string name="start_recording">Start Recording</string>
+    <string name="stop_recording">Stop Recording</string>
+    <string name="permission_denied">Microphone permission is required for calibration.</string>
+    <string name="text_size">Text Size</string>
+    <string name="increase_text_size">Increase text size</string>
+    <string name="decrease_text_size">Decrease text size</string>
+    <string name="start">开始</string>
+    <string name="stop">停止</string>
+    <string name="permission_required">需要权限以正常使用应用</string>
+    <string name="delete">删除</string>
+    <string name="calibration">校准</string>
+    <string name="memory_list">记忆列表</string>
+    <string name="add_memory">添加记忆</string>
+    <string name="search">搜索</string>
+    <string name="settings">设置</string>
+    <string name="voice_service_started">语音服务已启动</string>
+    <string name="voice_service_stopped">语音服务已停止</string>
+    <string name="confirm_delete">确定要删除吗？</string>
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="skip">跳过</string>
+</resources>
