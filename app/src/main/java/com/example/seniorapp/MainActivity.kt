@@ -42,8 +42,15 @@ class MainActivity : ComponentActivity() {
         }
         
         setContent {
-            MaterialTheme(colorScheme = lightColorScheme()) {
-                SeniorVoiceAssistantScreen(voiceAssistant)
+            MaterialTheme(
+                colorScheme = lightColorScheme(
+                    primary = MaterialTheme.colorScheme.primary,
+                    onPrimary = MaterialTheme.colorScheme.onPrimary,
+                    surface = MaterialTheme.colorScheme.surface,
+                    onSurface = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                AccessibleVoiceAssistantScreen(voiceAssistant)
             }
         }
     }
@@ -65,58 +72,47 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SeniorVoiceAssistantScreen(voiceAssistant: VoiceAssistant) {
+fun AccessibleVoiceAssistantScreen(voiceAssistant: VoiceAssistant) {
     val isListening by voiceAssistant.isListening.collectAsState()
     val lastResult by voiceAssistant.lastResult.collectAsState()
     val volumeLevel by voiceAssistant.volumeLevel.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     
-    Surface(modifier = Modifier.fillMaxSize()) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            
             // Title
             Text(
                 text = "语音助手",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 32.dp)
+                color = MaterialTheme.colorScheme.onBackground,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 32.dp)
             )
+            
+            Spacer(modifier = Modifier.height(16.dp))
             
             // Volume indicator (only show when listening)
             if (isListening) {
-                VolumeIndicator(volumeLevel)
-                Spacer(modifier = Modifier.height(24.dp))
+                AccessibleVolumeIndicator(volumeLevel)
             }
             
             // Result display
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .padding(bottom = 32.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = lastResult.ifEmpty { "按下按钮开始说话" },
-                        fontSize = 18.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-            }
+            AccessibleResultCard(lastResult)
+            
+            Spacer(modifier = Modifier.weight(1f))
             
             // Main voice button
-            Button(
+            AccessibleButton(
                 onClick = {
                     coroutineScope.launch {
                         if (isListening) {
@@ -126,63 +122,105 @@ fun SeniorVoiceAssistantScreen(voiceAssistant: VoiceAssistant) {
                         }
                     }
                 },
+                isListening = isListening
+            )
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Emergency contact button
+            OutlinedButton(
+                onClick = { /* TODO: Open emergency contact setup */ },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isListening) MaterialTheme.colorScheme.error
-                    else MaterialTheme.colorScheme.primary
-                )
+                    .height(64.dp),
+                shape = MaterialTheme.shapes.medium
             ) {
                 Text(
-                    text = if (isListening) "停止" else "开始说话",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
+                    text = "设置紧急联系人",
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
             
             Spacer(modifier = Modifier.height(24.dp))
-            
-            // Emergency contact button
-            OutlinedButton(
-                onClick = {
-                    // TODO: Open emergency contact setup
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-            ) {
-                Text(
-                    text = "设置紧急联系人",
-                    fontSize = 18.sp
-                )
-            }
         }
     }
 }
 
 @Composable
-fun VolumeIndicator(volumeLevel: Float) {
-    val normalizedVolume = ((volumeLevel + 80f) / 80f).coerceIn(0f, 1f)
-    
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+fun AccessibleVolumeIndicator(volumeLevel: Float) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 16.dp)
+    ) {
         Text(
             text = "音量",
-            fontSize = 16.sp,
+            fontSize = 20.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         
         LinearProgressIndicator(
-            progress = { normalizedVolume },
+            progress = { ((volumeLevel + 80f) / 80f).coerceIn(0f, 1f) },
             modifier = Modifier
-                .width(200.dp)
-                .height(8.dp)
+                .width(280.dp)
+                .height(12.dp)
                 .padding(top = 8.dp),
-            color = when {
-                normalizedVolume < 0.3f -> MaterialTheme.colorScheme.error
-                normalizedVolume < 0.7f -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.primary
-            }
+            color = MaterialTheme.colorScheme.primary,
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    }
+}
+
+@Composable
+fun AccessibleResultCard(result: String) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = result.ifEmpty { "请按下按钮开始说话" },
+                fontSize = 24.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface,
+                lineHeight = 32.sp
+            )
+        }
+    }
+}
+
+@Composable
+fun AccessibleButton(
+    onClick: () -> Unit,
+    isListening: Boolean
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+        shape = MaterialTheme.shapes.medium,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isListening) 
+                MaterialTheme.colorScheme.error
+            else 
+                MaterialTheme.colorScheme.primary
+        )
+    ) {
+        Text(
+            text = if (isListening) "停止" else "开始说话",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
